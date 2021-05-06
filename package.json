@@ -1,0 +1,22 @@
+{
+  "name": "baodbot",
+  "version": "1.0.0",
+  "description": "Bot for baod discrod",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kingen1233/BaodBot.git"
+  },
+  "author": "Karl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kingen1233/BaodBot/issues"
+  },
+  "homepage": "https://github.com/kingen1233/BaodBot#readme",
+  "dependencies": {
+    "discord.js": "^12.5.3"
+  }
+}
