@@ -17,6 +17,10 @@
   },
   "homepage": "https://github.com/kingen1233/BaodBot#readme",
   "dependencies": {
-    "discord.js": "^12.5.3"
+    "discord.js": "^12.5.3",
+    "pg": "^8.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.25.0"
   }
 }
