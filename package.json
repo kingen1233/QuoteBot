@@ -18,7 +18,8 @@
   "homepage": "https://github.com/kingen1233/BaodBot#readme",
   "dependencies": {
     "discord.js": "^12.5.3",
-    "pg": "^8.6.0"
+    "pg": "^8.6.0",
+    "pgtools": "^0.3.1"
   },
   "devDependencies": {
     "eslint": "^7.25.0"

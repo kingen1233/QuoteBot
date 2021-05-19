@@ -1,9 +1,11 @@
-const { Pool, Client } = require('pg')
+const { Pool } = require('pg')
+const { databaseName } = require('../config.json');
+
 
 const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
-    database: 'baod',
+    database: databaseName,
     password: 'password',
     port: 5432,
 })
@@ -40,25 +42,19 @@ const resetGold = async () => {
     }
 }
 
+const init = async () => {
+    try {
+        await pool.query('DROP TABLE IF EXISTS goldtracker; CREATE TABLE goldtracker(amountofgold DOUBLE PRECISION); INSERT INTO goldtracker(amountofgold) VALUES(0);')
+    }
+    catch (err) {
+        console.error(err)
+    }
+}
+
 module.exports = {
     getGold,
     updateGold,
     resetGold,
+    init,
     
 }
-
-/*
-const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'baod',
-    password: 'password',
-    port: 5432,
-})
-
-client.connect()
-client.query('SELECT NOW()', (err, res) => {
-    console.log(err, res)
-    client.end()
-})
-*/

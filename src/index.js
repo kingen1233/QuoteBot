@@ -1,7 +1,25 @@
+const fs = require('fs');
 const Discord = require('discord.js');
 const { prefix, token } = require('../config.json');
-const db = require('./db')
+
 const client = new Discord.Client();
+
+// Collection (Map) containing all the commands and their code
+client.commands = new Discord.Collection();
+
+// Read all the files from "command" folder
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+	const command = require(`./commands/${file}`);
+	// set a new item in the Collection
+	// with the key as the command name and the value as the exported module
+	client.commands.set(command.name, command);
+}
+
+// To add any roles that should be allowed to use the bot, simply add the roleid to the "allowedRoles" array.
+//                       Karl dev role      Baod Channel staff role   Senior staff            Owner                 Head staff             co-owner
+ const allowedRoles = ['844504510528225301', '778254713682264064', '778254712877088798', '778254710456451082', '778254708270956575', '778254708837449739']
 
 client.once('ready', () => {
 	console.log('Ready!');
@@ -9,89 +27,26 @@ client.once('ready', () => {
 
 client.login(token);
 
-
-client.on('message', async message => {
+client.on('message', async message => {	
+	
 	if (!message.content.startsWith(prefix) || message.author.bot) return;
-
+	
+	if(!userIsAllowed(message.member, allowedRoles)) return
+	
 	const args = message.content.slice(prefix.length).trim().split(/ +/);
-	const command = args.shift().toLowerCase();
-	console.log('COMMAND', command, args);
-
-	if (command === 'collectgp') {
-
-		if (args[0] === 'undefined') {
-			message.channel.send(`No amount specified.`);
-			return;
-		}
-
-		let money = Number(await db.getGold())
-
-		argument = args[0];
-		lastChar = argument.length - 1;
-
-		amount = Number(argument.substring(0, lastChar));
-		suffix = argument[lastChar];
-
-		if (amount.countDecimals() === 1 || amount.countDecimals() === 0) {
-			if (suffix === 'm') {
-
-				money += amount
-				money = Math.round(money * 10) / 10
-
-				await db.updateGold(money)
-				message.channel.send(`Adding ${amount}${suffix} to the gold pile.\nAmount of GP: ${money}m.`);
-			} else {
-				message.channel.send(`${amount}${suffix} is not a valid amount, command must end with \'m\'`);
-			}
-
-		} else {
-			message.channel.send(`Only one decimal is allowed, round to the nearest 100k mark.`);
-			return;
-		}
-
+	const commandName = args.shift().toLowerCase();
+	console.log('COMMAND', commandName, args);
 	
-	
-	} else if (command === 'removegp') {	
+	// Check if command exists in the command collection
+	if (!client.commands.has(commandName)) return;
 
-		if (args[0] === 'undefined') {
-			message.channel.send(`No amount specified.`);
-			return;
-		}
+	const command = client.commands.get(commandName)
 
-		let money = Number(await db.getGold())
-
-		argument = args[0];
-		lastChar = argument.length - 1;
-
-		amount = Number(argument.substring(0, lastChar));
-		suffix = argument[lastChar];
-
-		if (amount.countDecimals() === 1 || amount.countDecimals() === 0) {
-			if (suffix === 'm') {
-				if (money - amount < 0) {
-					message.channel.send(`You can't remove ${amount}${suffix} from the gold pile as it only consists of ${money}m.`);
-					return;
-				}
-				money -= amount
-				money = Math.round(money * 10) / 10
-				await db.updateGold(money)
-				message.channel.send(`Removing ${amount}${suffix} from the gold pile.\nAmount of GP: ${money}m.`);
-			} else {
-				message.channel.send(`${amount}${suffix} is not a valid amount, command must end with \'m\'`);
-			}
-
-		} else {
-			message.channel.send(`Only one decimal is allowed, round to the nearest 100k mark.`);
-			return;
-		}
-	}
-	else if (command === 'currentgp') {
-		let money = Number(await db.getGold())
-		message.channel.send(`Amount of GP: ${money}m`);
-	}
-	else if (command === 'resetgp') {
-		await db.resetGold()
-		message.channel.send(`Gold pile reset.\nAmount of GP: 0m`);
+	try {
+		command.execute(message, args);
+	} catch (error) {
+		console.error(error);
+		message.reply('there was an error trying to execute that command!');
 	}
 
 });
@@ -99,4 +54,13 @@ client.on('message', async message => {
 Number.prototype.countDecimals = function () {
 	if (Math.floor(this.valueOf()) === this.valueOf()) return 0;
 	return this.toString().split(".")[1].length || 0;
+}
+
+function userIsAllowed(member, allowedRoles){
+	for(const roleId of allowedRoles){
+		if(member.roles.cache.has(roleId)){
+			return true
+		}
+	}
+	return false
 }
