@@ -1,2 +1,2 @@
-# BaodBot
-Bot for Baod discord server, qouting
+# QuoteBot
+Bot for discord server quoting
